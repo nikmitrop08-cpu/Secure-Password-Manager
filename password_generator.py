@@ -1,7 +1,9 @@
 #how long / uppercase / include numbers / inlcude symbols
+import json
 import secrets
 import string
-
+import math
+import _json
 
 def get_length():
     while True:
@@ -83,10 +85,52 @@ def strength_checker(password, uppercase, lowercase, digits, symbols) :
     else :
         return "Strong"
 
+def get_amount() :
+    while True:
+        amount = input("Enter amount of passwords: ")
+
+        if amount.isdigit() and int(amount) > 0 :
+            return int(amount)
+
+        print("enter a valid amount")
+
+def calculate_entropy(password, characters) :
+    length = len(password)
+    pool_size = len(characters)
+
+    entropy = length * math.log2(pool_size)
+
+    return entropy
+
+def save_data(website, username, password ) :
+
+    entry = {
+        "website" : website,
+        "username" : username,
+        "password" : password,
+    }
+
+    try :
+        with open("vault.json" , "r") as file :
+            vault = json.load(file)
+
+    except FileNotFoundError :
+        vault = []
+
+    vault.append(entry)
+
+    with open ("vault.json", "w") as file :
+        json.dump(vault, file, indent = 4)
+
+    print("Password saved")
+
 def main():
     print ("Password Generator")
 
     length = get_length()
+
+    amount = get_amount()
+
     uppercase = ask_question("Include uppercase?: ")
     lowercase = ask_question("Include lowercase?: ")
     digits = ask_question("Include digits?: ")
@@ -94,7 +138,6 @@ def main():
 
     characters = character_pool(uppercase, lowercase, digits, symbols)
 
-    password = generate_password(length,characters, uppercase, digits, symbols, lowercase)
 
     if characters == "" :
         print ("You must select at least one character type")
@@ -104,7 +147,18 @@ def main():
         print("Password length is too short")
         return
 
-    print (password)
-    print (f"Your password is {strength_checker(password, uppercase, lowercase, digits, symbols)}" )
+    for i in range(amount):
 
+        password = generate_password(length, characters, uppercase, digits, symbols, lowercase)
+
+        entropy = calculate_entropy(password, characters)
+
+        print (password)
+        print (f"Your password is {strength_checker(password, uppercase, lowercase, digits, symbols)}" )
+        print("Entropy is", round(entropy, 2), "bits")
+
+    website = input("Enter website: ")
+    username = input("Enter username: ")
+
+    save_data(website, username, password)
 main()
