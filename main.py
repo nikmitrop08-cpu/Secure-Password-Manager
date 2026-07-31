@@ -1,7 +1,7 @@
 from password_generator import runner , get_length, get_amount , ask_question , character_pool, generate_password, calculate_entropy , strength_checker
 from vault import save_data
 from authentication import login_screen
-from vault import view_vault, search_vault
+from vault import view_vault, search_vault, edit_vault, delete_password
 
 def main():
 
@@ -10,29 +10,37 @@ def main():
         print("Vault unlocked")
 
 
-    while True :
-        print("PASSWORD MANAGER")
-        print("1 generate")
-        print("2 view vault")
-        print("3 search vault")
-        print("4 exit")
+        while True :
+            print("PASSWORD MANAGER")
+            print("1 generate")
+            print("2 view vault")
+            print("3 search vault")
+            print("4 edit vault")
+            print("5 delete password")
+            print("6 exit")
 
-        choice = input("choose : ")
+            choice = input("choose : ")
 
-        if choice == "1" :
-            runner()
+            if choice == "1" :
+                runner()
 
-        elif choice == "2" :
-            view_vault()
+            elif choice == "2" :
+                view_vault()
 
-        elif choice == "3" :
-            search_vault()
+            elif choice == "3" :
+                search_vault()
 
-        elif choice == "4" :
-            print("Goodbye")
-            break
-        else :
-            print("Invalid choice")
+            elif choice == "4" :
+                edit_vault()
+
+            elif choice == "5" :
+                delete_password()
+
+            elif choice == "6" :
+                print("Goodbye")
+                break
+            else :
+                print("Invalid choice")
 
     else :
         print("Closing Program")

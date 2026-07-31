@@ -4,7 +4,6 @@ import secrets
 import string
 import math
 from vault import save_data
-print("generator loaded")
 
 def get_length():
     while True:

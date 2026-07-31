@@ -2,8 +2,6 @@ import bcrypt
 import json
 import os
 
-print("auth loaded")
-
 CONFIG_FILE = "config.json"
 
 def create_master_password() :

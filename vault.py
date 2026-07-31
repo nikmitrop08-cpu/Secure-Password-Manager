@@ -73,4 +73,79 @@ def search_vault():
     except FileNotFoundError :
         print("Vault file does not exist")
 
+def edit_vault():
+
+    website = input("Enter website to edit: ").lower()
+
+    try:
+        with open(VAULT_FILE, "r") as file :
+
+            vault = json.load(file)
+
+        found = False
+
+        for entry in vault :
+
+
+
+
+            if   entry ["website"].lower() == website :
+
+                print("EDIT PASSWORD")
+
+                new_username = input("New username: ")
+                new_password = input("New password: ")
+
+                entry["username"] = new_username
+                entry["password"] = new_password
+
+                found = True
+
+        if found:
+
+            with open(VAULT_FILE, "w") as file:
+
+                json.dump(vault, file, indent=4)
+
+            print("Password updated successfully.")
+
+        else:
+            print("Website not found")
+
+    except FileNotFoundError :
+        print("Vault does not exist")
+
+def delete_password():
+
+    website = input("Enter a website to delete: ")
+
+    try:
+
+        with open(VAULT_FILE, "r") as file :
+            vault = json.load(file)
+
+        found = False
+
+        for entry in vault:
+
+            if entry["website"].lower() == website :
+
+                vault.remove(entry)
+
+                found = True
+
+                break
+
+        if found :
+                with open(VAULT_FILE , "w") as file:
+                    json.dump(vault , file, indent=4)
+
+                print("Password deleted successfully")
+
+        else :
+                print("Website not found")
+
+    except FileNotFoundError:
+
+        print("Vault does not exist")
 
