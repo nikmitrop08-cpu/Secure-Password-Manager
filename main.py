@@ -1,50 +1,41 @@
-from password_generator import get_length, get_amount , ask_question , character_pool, generate_password, calculate_entropy , strength_checker
+from password_generator import runner , get_length, get_amount , ask_question , character_pool, generate_password, calculate_entropy , strength_checker
 from vault import save_data
+from authentication import login_screen
+from vault import view_vault, search_vault
 
 def main():
-    print ("Password Generator")
-
-    length = get_length()
-
-    amount = get_amount()
-
-    uppercase = ask_question("Include uppercase?: ")
-    lowercase = ask_question("Include lowercase?: ")
-    digits = ask_question("Include digits?: ")
-    symbols = ask_question("Include symbols?: ")
-
-    characters = character_pool(uppercase, lowercase, digits, symbols)
 
 
-    if characters == "" :
-        print ("You must select at least one character type")
-        return
+    if login_screen():
+        print("Vault unlocked")
 
-    if length < sum ([uppercase, lowercase, digits, symbols]) :
-        print("Password length is too short")
-        return
 
-    for i in range(amount):
+    while True :
+        print("PASSWORD MANAGER")
+        print("1 generate")
+        print("2 view vault")
+        print("3 search vault")
+        print("4 exit")
 
-        password = generate_password(length, characters, uppercase, digits, symbols, lowercase)
+        choice = input("choose : ")
 
-        entropy = calculate_entropy(password, characters)
+        if choice == "1" :
+            runner()
 
-        print("Generated password: ")
-        print (password)
-        print (f"Your password is {strength_checker(password, uppercase, lowercase, digits, symbols)}" )
-        print("Entropy is", round(entropy, 2), "bits")
+        elif choice == "2" :
+            view_vault()
 
-        save = input("Do you want to save this password? (y/n): ")
+        elif choice == "3" :
+            search_vault()
 
-        if save == "y" :
-
-            website = input("Enter website: ")
-            username = input("Enter username: ")
-
-            save_data(website, username, password)
-
-            print("Your password has been saved")
+        elif choice == "4" :
+            print("Goodbye")
+            break
         else :
-            print("Your password is not saved")
+            print("Invalid choice")
+
+    else :
+        print("Closing Program")
+
+
 main()
