@@ -1,5 +1,5 @@
 #how long / uppercase / include numbers / inlcude symbols
-import random
+import secrets
 import string
 
 
@@ -36,12 +36,53 @@ def character_pool(lowercase, uppercase, digits, symbols):
         characters += string.punctuation
     return characters
 
-def generate_password(length,characters):
-    password = ""
-    for i in range(length):
-        password += random.choice(characters)
+def generate_password(length,characters, uppercase, digits, symbols, lowercase):
 
-    return password
+    password = ""
+
+    if uppercase:
+        password += secrets.choice(string.ascii_uppercase)
+
+    if lowercase:
+        password += secrets.choice(string.ascii_lowercase)
+
+    if digits:
+        password += secrets.choice(string.digits)
+
+    if symbols:
+        password += secrets.choice(string.punctuation)
+
+    while len(password) < length:
+        password += secrets.choice(characters)
+
+    password_list = list(password)
+
+    mixed_password = ""
+
+    while password_list :
+        character = secrets.choice(password_list)
+        mixed_password += character
+        password_list.remove(character)
+
+    return mixed_password
+
+def strength_checker(password, uppercase, lowercase, digits, symbols) :
+    score = 0
+    if len(password) >= 8 :
+        score += 1
+    if uppercase :
+        score += 1
+    if digits :
+        score += 1
+    if symbols :
+        score += 1
+    if score <=1 :
+        return "Weak"
+    if score <=3 :
+        return "Medium"
+    else :
+        return "Strong"
+
 def main():
     print ("Password Generator")
 
@@ -53,8 +94,17 @@ def main():
 
     characters = character_pool(uppercase, lowercase, digits, symbols)
 
-    password = generate_password(length,characters)
+    password = generate_password(length,characters, uppercase, digits, symbols, lowercase)
+
+    if characters == "" :
+        print ("You must select at least one character type")
+        return
+
+    if length < sum ([uppercase, lowercase, digits, symbols]) :
+        print("Password length is too short")
+        return
 
     print (password)
+    print (f"Your password is {strength_checker(password, uppercase, lowercase, digits, symbols)}" )
 
 main()
