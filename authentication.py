@@ -33,9 +33,9 @@ def verify_user():
     stored_hash = data["password_hash"].encode()
 
     if bcrypt.checkpw(master_password, stored_hash) :
-        return True
+        return True, master_password
 
-    return False
+    return False ,None
 
 def master_password_exists():
     return os.path.exists(CONFIG_FILE)
@@ -45,18 +45,18 @@ def login_screen():
     if not master_password_exists() :
         print("no master password found")
         create_master_password()
-
-        return True
+        master_password = create_master_password()
+        return True , master_password
 
     attempts = 3
 
     while attempts > 0 :
         print("Login")
-
-        if verify_user() :
+        logged_in , master_password = verify_user()
+        if logged_in :
             print("Login successful")
 
-            return True
+            return True , master_password
 
         else :
             attempts -= 1
@@ -64,4 +64,4 @@ def login_screen():
             print(f"Wrong password . Attempts left : {attempts}")
 
     print("Access denied")
-    return False
+    return False , None

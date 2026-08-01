@@ -2,48 +2,63 @@ from password_generator import runner , get_length, get_amount , ask_question , 
 from vault import save_data
 from authentication import login_screen
 from vault import view_vault, search_vault, edit_vault, delete_password
+from encryption import create_key
 
 def main():
+    while True:
+         logged_in, master_password = login_screen()
+         if logged_in :
+                print("Vault unlocked")
 
+                key = create_key(master_password)
 
-    if login_screen():
-        print("Vault unlocked")
+                while True :
+                    print("PASSWORD MANAGER")
+                    print("1 generate")
+                    print("2 view vault")
+                    print("3 search vault")
+                    print("4 edit vault")
+                    print("5 delete password")
+                    print("6 lock")
+                    print("7 exit")
+                    choice = input("choose : ")
 
+                    if choice == "1" :
+                        runner(key)
 
-        while True :
-            print("PASSWORD MANAGER")
-            print("1 generate")
-            print("2 view vault")
-            print("3 search vault")
-            print("4 edit vault")
-            print("5 delete password")
-            print("6 exit")
+                    elif choice == "2" :
+                        view_vault(key)
 
-            choice = input("choose : ")
+                    elif choice == "3" :
+                        search_vault(key)
 
-            if choice == "1" :
-                runner()
+                    elif choice == "4" :
+                        edit_vault(key)
 
-            elif choice == "2" :
-                view_vault()
+                    elif choice == "5" :
+                        delete_password(key)
 
-            elif choice == "3" :
-                search_vault()
+                    elif choice == "6" :
+                        print("Vault locked")
+                        break
+                    elif choice == "7" :
+                        print("Goodbye")
+                        return
+                    else :
+                        print("Invalid choice")
 
-            elif choice == "4" :
-                edit_vault()
-
-            elif choice == "5" :
-                delete_password()
-
-            elif choice == "6" :
-                print("Goodbye")
-                break
-            else :
-                print("Invalid choice")
-
-    else :
-        print("Closing Program")
+         else :
+                print("Closing Program")
 
 
 main()
+
+
+
+
+
+
+
+
+
+

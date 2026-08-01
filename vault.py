@@ -1,8 +1,9 @@
 import json
+from encryption import create_key, encrypt_data, decrypt_data
 
 VAULT_FILE = "vault.json"
 
-def save_data(website, username, password ) :
+def save_data(website, username, password , key) :
 
     entry = {
         "website" : website,
@@ -17,6 +18,10 @@ def save_data(website, username, password ) :
     except FileNotFoundError :
         vault = []
 
+    password = entry["password"]
+    encrypted_password = encrypt_data(password.encode(), key)
+    entry["password"] = encrypted_password.decode()
+
     vault.append(entry)
 
     with open (VAULT_FILE, "w") as file :
@@ -24,7 +29,7 @@ def save_data(website, username, password ) :
 
     print("Password saved")
 
-def view_vault() :
+def view_vault(key) :
     try :
         with open(VAULT_FILE, "r") as file :
             vault = json.load(file)
@@ -37,15 +42,18 @@ def view_vault() :
 
         for entry in vault:
 
+            encrypted_password = entry["password"].encode()
+            decrypted_password = decrypt_data(encrypted_password, key).decode()
+
             print("-----------------")
             print("Website:", entry["website"])
             print("Username:", entry["username"])
-            print("password:", entry["password"])
+            print("password:", decrypted_password)
 
     except FileNotFoundError :
         print("vault does not exist")
 
-def search_vault():
+def search_vault(key):
 
     search = input("search website: ").lower()
 
@@ -60,10 +68,12 @@ def search_vault():
         for entry in vault :
 
             if search in entry["website"].lower():
+                encrypted_password = entry["password"].encode()
+                password = decrypt_data(encrypted_password, key).decode()
                 print("-----------------")
                 print("Website:", entry["website"])
                 print("Username:", entry["username"])
-                print("Password:",entry["password"])
+                print("Password:", password)
 
                 found = True
 
@@ -73,7 +83,7 @@ def search_vault():
     except FileNotFoundError :
         print("Vault file does not exist")
 
-def edit_vault():
+def edit_vault(key):
 
     website = input("Enter website to edit: ").lower()
 
@@ -97,7 +107,8 @@ def edit_vault():
                 new_password = input("New password: ")
 
                 entry["username"] = new_username
-                entry["password"] = new_password
+                encrypted_password = encrypt_data(new_password.encode(), key)
+                entry["password"] = encrypted_password.decode()
 
                 found = True
 
@@ -115,7 +126,7 @@ def edit_vault():
     except FileNotFoundError :
         print("Vault does not exist")
 
-def delete_password():
+def delete_password(key):
 
     website = input("Enter a website to delete: ")
 

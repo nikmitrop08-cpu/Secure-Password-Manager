@@ -106,7 +106,7 @@ def calculate_entropy(password, characters) :
     return entropy
 
 
-def runner():
+def runner(key):
     length = get_length()
 
     amount = get_amount()
@@ -144,7 +144,7 @@ def runner():
             website = input("Enter website: ")
             username = input("Enter username: ")
 
-            save_data(website, username, password)
+            save_data(website, username, password,key )
 
             print("Your password has been saved")
         else:
