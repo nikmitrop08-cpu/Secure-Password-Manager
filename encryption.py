@@ -11,12 +11,12 @@ def create_key(master_password):
 
 def encrypt_data(data, key):
     cipher  = Fernet(key)
-    encrypted = cipher.encrypt(data)
-    return encrypted
+    encrypted = cipher.encrypt(data.encode())
+    return encrypted.decode()
 
 def decrypt_data(data, key):
     cipher = Fernet(key)
-    decrypted = cipher.decrypt(data)
-    return decrypted
+    decrypted = cipher.decrypt(data.encode())
+    return decrypted.decode()
 
 

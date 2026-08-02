@@ -22,9 +22,7 @@ def create_master_password() :
 
     print("Master password created")
 
-def verify_user():
-
-    master_password = input("Enter master password: ")
+def verify_user(password):
 
 
 
@@ -33,10 +31,10 @@ def verify_user():
 
     stored_hash = data["password_hash"].encode()
 
-    if bcrypt.checkpw(master_password.encode(), stored_hash) :
-        return True, master_password
+    if bcrypt.checkpw(password.encode(), stored_hash) :
+        return True
 
-    return False ,None
+    return False
 
 def master_password_exists():
     return os.path.exists(CONFIG_FILE)
@@ -89,28 +87,3 @@ def change_master_password():
     else:
         print("Wrong password")
 
-def login_screen():
-
-    if not master_password_exists() :
-        print("no master password found")
-        create_master_password()
-        master_password = create_master_password()
-        return True , master_password
-
-    attempts = 3
-
-    while attempts > 0 :
-        print("Login")
-        logged_in , master_password = verify_user()
-        if logged_in :
-            print("Login successful")
-
-            return True , master_password
-
-        else :
-            attempts -= 1
-
-            print(f"Wrong password . Attempts left : {attempts}")
-
-    print("Access denied")
-    return False , None

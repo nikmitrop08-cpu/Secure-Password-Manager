@@ -33,25 +33,21 @@ def view_vault(key) :
     try :
         with open(VAULT_FILE, "r") as file :
             vault = json.load(file)
+            print("loaded", vault)
 
-        if not vault         :
-            print("vault is empty")
-            return
-
-        print("SAVED PASSWORDS")
-
-        for entry in vault:
-
-            encrypted_password = entry["password"].encode()
-            decrypted_password = decrypt_data(encrypted_password, key).decode()
-
-            print("-----------------")
-            print("Website:", entry["website"])
-            print("Username:", entry["username"])
-            print("password:", decrypted_password)
-
-    except FileNotFoundError :
+    except FileNotFoundError:
         print("vault does not exist")
+
+    if not vault:
+        print("vault is empty")
+        return []
+
+    for entry in vault:
+        entry["website"] = decrypt_data(entry["website"], key)
+        entry["username"] = decrypt_data(entry["username"], key)
+        entry["password"] = decrypt_data(entry["password"], key)
+
+    return vault
 
 def search_vault(key):
 
