@@ -1,12 +1,13 @@
 import json
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from authentication import verify_user
 from encryption import create_key , encrypt_data, decrypt_data
 from vault import view_vault , save_data
 key=None
 attempts = 3
-
+passwords = []
 def login_screen():
 
     global root
@@ -111,19 +112,60 @@ def view_passwords(root):
         widget.destroy()
 
     label = tk.Label(root, text = "Your saved passwords", font = ("Arial", 16))
-    label.pack(pady=20)
+    label.pack(pady=10)
 
+    global table
+    global passwords
     passwords = view_vault(key)
 
+    table_frame = tk.Frame(root)
+    table_frame.pack(fill="both", expand=True)
+
+    table = ttk.Treeview(root,columns=("website", "username", "password"),show="headings")
+
+    table.heading("website", text="website")
+    table.heading("username", text="username")
+    table.heading("password", text="password")
+
+    table.column("website", width=150)
+    table.column("username",width=150)
+    table.column("password",width=150)
+
+    table.pack(fill="both", expand=True)
+
     if not passwords:
-        empty = tk.Label(root, text="Vault is empty")
-        empty.pack()
+        table.insert("","end",values=("No passwords","",""))
     else:
         for entry in passwords:
-            label = tk.Label(root, text =f"Website: {entry['website']}\nUsername: {entry['username']}\nPassword: {entry['password']}", font = ("Arial", 16))
-            label.pack(pady=10)
+            table.insert("", "end",values=(entry["website"], entry["username"], entry["password"]))
+    print(table.get_children())
+
+    delete_button = tk.Button(root, text="Delete", command=delete_password)
+    delete_button.pack()
+
     back_button = tk.Button(root, text = "Back", command=show_menu)
     back_button.pack(pady=10)
+
+
+
+def delete_password():
+    selected = table.selection()
+
+    if selected:
+        answer = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this password?")
+        if answer:
+            values = table.item(selected[0],"values")
+            for entry in passwords:
+                if entry["website"] == values[0] and entry["username"] == values[1]:
+                    passwords.remove(entry)
+                    break
+
+            with open("vault.json", "w") as file:
+                json.dump(passwords, file)
+
+            table.delete(selected[0])
+
+
 
 def show_menu():
 
