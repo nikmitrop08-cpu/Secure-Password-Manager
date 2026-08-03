@@ -6,6 +6,7 @@ from authentication import verify_user
 from encryption import create_key , encrypt_data, decrypt_data
 from vault import view_vault , save_data
 key=None
+editing_index = None
 attempts = 3
 passwords = []
 def login_screen():
@@ -29,7 +30,7 @@ def login_screen():
     login_button = tk.Button(root, text = "Login", command = login)
     login_button.pack(pady=10)
 
-    root.bind("<Return>", lambda event: login())
+    password_entry.bind("<Return>", lambda event: login())
     root.mainloop()
 
 def login():
@@ -52,6 +53,7 @@ def login():
             root.destroy()
 
 def add_password():
+    global website_entry, username_entry, password_entry
 
     for widget in root.winfo_children():
         widget.destroy()
@@ -97,8 +99,12 @@ def save_new_password(website_entry , username_entry , password_entry , key):
 
     except FileNotFoundError:
         vault = []
-
-    vault.append(encrypted_entry)
+    global editing_index
+    if editing_index is not None:
+        vault[editing_index]=encrypted_entry
+        editing_index = None
+    else:
+        vault.append(encrypted_entry)
 
     with open("vault.json", "w") as file:
         json.dump(vault, file, indent=4)
@@ -138,14 +144,36 @@ def view_passwords(root):
     else:
         for entry in passwords:
             table.insert("", "end",values=(entry["website"], entry["username"], entry["password"]))
-    print(table.get_children())
 
-    delete_button = tk.Button(root, text="Delete", command=delete_password)
-    delete_button.pack()
+    button_frame=tk.Frame(root)
+    button_frame.pack(pady=10)
 
-    back_button = tk.Button(root, text = "Back", command=show_menu)
-    back_button.pack(pady=10)
+    edit_button = tk.Button(button_frame , text="Edit", command= edit_password)
+    edit_button.pack(side="left",padx=5)
 
+    delete_button = tk.Button(button_frame, text="Delete", command=delete_password)
+    delete_button.pack(side="left", padx=5)
+
+    back_button = tk.Button(button_frame, text = "Back", command=show_menu)
+    back_button.pack(side="left", padx=5)
+
+def edit_password():
+    global editing_index
+    selected= table.selection()
+
+    if selected:
+        editing_index = table.index(selected[0])
+        values = table.item(selected[0],"values")
+
+        add_password()
+
+        website_entry.delete(0,tk.END)
+        username_entry.delete(0,tk.END)
+        password_entry.delete(0,tk.END)
+
+        website_entry.insert(0,values[0])
+        username_entry.insert(0,values[1])
+        password_entry.insert(0,values[2])
 
 
 def delete_password():
@@ -178,14 +206,8 @@ def show_menu():
     view_button = tk.Button(root, text="View Passwords", width=20, command=lambda: view_passwords(root))
     view_button.pack(pady=5)
 
-    search_button = tk.Button(root, text="Search Passwords", width=20)
-    search_button.pack(pady=5)
-
     add_button = tk.Button(root, text="Add Passwords",command = add_password, width=20)
     add_button.pack(pady=5)
-
-    edit_button = tk.Button(root, text="Edit Passwords", width=20)
-    edit_button.pack(pady=5)
 
     generate_button = tk.Button(root, text="Generate Passwords", width=20)
     generate_button.pack(pady=5)

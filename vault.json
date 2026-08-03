@@ -1,12 +1,1 @@
-[
-    {
-        "website": "gAAAAABqcHKyaGybRK9OwNMUtNDNKCPHdtOLN4ZxK7BCDo9Ee9VxRwpPTwBoFeG31rmOfukRtEaJXx2C7kQdoK4QXcTonXxcNA==",
-        "username": "gAAAAABqcHKypw1DEMGdktWBDUwi8jF8wnf3C003Zsg-u44iyd-Hu1KcimoS2xEQsmhxQgys8bzjpFLt1MaMa-Y7HiaNwrBMww==",
-        "password": "gAAAAABqcHKysetqlhp7ptKKlXDMvxoJ5evIziZ46l0hxO8_GV_uErg5Bs8YxLRlX0BTYr6zF09s_rnYwc831zwBkxT-abDY8g=="
-    },
-    {
-        "website": "gAAAAABqcHK8chrAbO1b0GmV03lX5BGGLVM-mmttKhNqhSdFZPKIHIJtr8AFRr_9TzPItcSp5mqbAXmLFifJHGtULTWvKSzIeA==",
-        "username": "gAAAAABqcHK8yO6v76mpn2LtXvU6yK_VBogi5QUjU6QSmyptZJkuQgXvlxt8OmkimQKrskYp2HlN2wZhowDOLpjgJoFffdjFOg==",
-        "password": "gAAAAABqcHK8L5TzyQwlrNkXr50GkKfGgTjKQTgI_MYzNQeLe41XKFUgIyBNnCeRmZIg-uqyMlslEj9i-o38FcHUIE6QvA3sGg=="
-    }
-]
+[{"website": "bank", "username": "uhi", "password": "12345"}, {"website": "nikos", "username": "uhi", "password": "123456"}, {"website": "nikolas", "username": "uhi", "password": "123456"}, {"website": "", "username": "", "password": ""}]
