@@ -21,7 +21,7 @@ def save_data(website, username, password , key) :
     password = entry["password"]
     encrypted_password = encrypt_data(password.encode(), key)
     entry["password"] = encrypted_password.decode()
-
+    print("apending entry" , entry)
     vault.append(entry)
 
     with open (VAULT_FILE, "w") as file :
@@ -95,7 +95,7 @@ def edit_vault(key):
 
 
 
-            if   entry ["website"].lower() == website :
+            if   entry ["website"].lower() ==  website:
 
                 print("EDIT PASSWORD")
 

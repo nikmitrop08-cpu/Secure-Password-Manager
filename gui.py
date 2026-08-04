@@ -1,3 +1,4 @@
+
 import json
 import tkinter as tk
 from tkinter import messagebox
@@ -5,7 +6,10 @@ from tkinter import ttk
 from authentication import verify_user
 from encryption import create_key , encrypt_data, decrypt_data
 from vault import view_vault , save_data
+
+search_entry = None
 key=None
+show_password = False
 editing_index = None
 attempts = 3
 passwords = []
@@ -85,11 +89,26 @@ def add_password():
     back_button = tk.Button(root, text = "Back", command= show_menu)
     back_button.pack()
 
-def save_new_password(website_entry , username_entry , password_entry , key):
+def live_search(event=None):
+    query = search_entry.get().lower()
 
+    for row in table.get_children():
+        table.delete(row)
+
+    for password in passwords:
+
+        if(query in password["website"].lower() or query in password["username"].lower()):
+
+            table.insert("",tk.END, values=(password["website"], password["username"], "********"))
+
+def save_new_password(website_entry , username_entry , password_entry , key):
+    print("SAVE NEW PASSWORD RUNNING")
     website = website_entry.get()
     username = username_entry.get()
     password = password_entry.get()
+    print("Website: ", website)
+    print("Username:",username)
+    print("Password:", password)
 
     encrypted_entry = {"website": encrypt_data(website, key), "username": encrypt_data(username, key), "password": encrypt_data(password, key)}
 
@@ -100,10 +119,15 @@ def save_new_password(website_entry , username_entry , password_entry , key):
     except FileNotFoundError:
         vault = []
     global editing_index
+    print("EDITING INDEX", editing_index)
     if editing_index is not None:
+        print("Edit index", editing_index)
+        print("Vault before " ,vault)
         vault[editing_index]=encrypted_entry
+        print("Vault after" , vault)
         editing_index = None
     else:
+        print(encrypted_entry)
         vault.append(encrypted_entry)
 
     with open("vault.json", "w") as file:
@@ -127,6 +151,23 @@ def view_passwords(root):
     table_frame = tk.Frame(root)
     table_frame.pack(fill="both", expand=True)
 
+    global search_entry
+
+    search_canvas = tk.Canvas(root, height=40, highlightthickness=0)
+    search_canvas.pack(pady=10)
+
+    search_entry = ttk.Entry(search_canvas , width = 40)
+    search_entry_window = search_canvas.create_window(100,20,window=search_entry)
+
+    search_canvas.create_window(120,20, window=search_entry, width=220,height=30)
+
+    clear_button = ttk.Button(search_canvas, text = "X", command=clear_search)
+    search_canvas.create_window(260,20,window=clear_button)
+
+    search_entry.bind("<KeyRelease>", live_search)
+
+
+
     table = ttk.Treeview(root,columns=("website", "username", "password"),show="headings")
 
     table.heading("website", text="website")
@@ -143,7 +184,7 @@ def view_passwords(root):
         table.insert("","end",values=("No passwords","",""))
     else:
         for entry in passwords:
-            table.insert("", "end",values=(entry["website"], entry["username"], entry["password"]))
+            table.insert("", "end",values=(entry["website"], entry["username"], "********"))
 
     button_frame=tk.Frame(root)
     button_frame.pack(pady=10)
@@ -154,8 +195,53 @@ def view_passwords(root):
     delete_button = tk.Button(button_frame, text="Delete", command=delete_password)
     delete_button.pack(side="left", padx=5)
 
+    view_button = tk.Button(button_frame, text="Show", command= view_password)
+    view_button.pack(side="left",padx=5)
+
+    copy_button = tk.Button(button_frame, text="Copy",command=copy_password)
+    copy_button.pack(side="left", padx=5)
+
     back_button = tk.Button(button_frame, text = "Back", command=show_menu)
     back_button.pack(side="left", padx=5)
+
+def view_password():
+    global show_password
+
+    selected= table.selection()
+
+    if selected:
+        item = selected[0]
+        values = table.item(item,"values")
+
+        if show_password:
+            table.item(item,values=(values[0],values[1],"********"))
+            show_password=False
+        else :
+            website= values[0]
+
+            for password in passwords:
+                if password["website"] == website:
+                    table.item(item,values=(values[0],values[1],password["password"]))
+                    break
+            show_password=True
+
+def clear_search():
+    search_entry.delete(0, tk.END)
+    live_search()
+
+def copy_password():
+    selected = table.selection()
+
+    if selected:
+        values= table.item(selected[0],"values")
+
+        website= values[0]
+
+        for entry in passwords:
+            if entry["website"] == website:
+                root.clipboard_clear()
+                root.clipboard_append(entry["password"])
+                break
 
 def edit_password():
     global editing_index
