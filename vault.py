@@ -1,3 +1,4 @@
+#vault
 import json
 from encryption import create_key, encrypt_data, decrypt_data
 
@@ -19,9 +20,11 @@ def save_data(website, username, password , key) :
         vault = []
 
     password = entry["password"]
-    encrypted_password = encrypt_data(password.encode(), key)
-    entry["password"] = encrypted_password.decode()
-    print("apending entry" , entry)
+    encrypted_password = encrypt_data(password, key)
+    print(type(encrypted_password))
+    print(encrypted_password)
+    entry["password"] = encrypted_password
+
     vault.append(entry)
 
     with open (VAULT_FILE, "w") as file :
@@ -30,6 +33,8 @@ def save_data(website, username, password , key) :
     print("Password saved")
 
 def view_vault(key) :
+
+    print("view vault started")
     try :
         with open(VAULT_FILE, "r") as file :
             vault = json.load(file)
@@ -41,13 +46,17 @@ def view_vault(key) :
     if not vault:
         print("vault is empty")
         return []
-
+    decrypted_vault = []
     for entry in vault:
-        entry["website"] = decrypt_data(entry["website"], key)
-        entry["username"] = decrypt_data(entry["username"], key)
-        entry["password"] = decrypt_data(entry["password"], key)
+        print("ENTRY", entry)
+        decrypted_entry= {
+            "website" : decrypt_data(entry["website"], key),
+            "username" : decrypt_data(entry["username"], key),
+            "password" : decrypt_data(entry["password"], key)
+        }
+        decrypted_vault.append(decrypted_entry)
 
-    return vault
+    return decrypted_vault
 
 def search_vault(key):
 
@@ -64,8 +73,9 @@ def search_vault(key):
         for entry in vault :
 
             if search in entry["website"].lower():
-                encrypted_password = entry["password"].encode()
-                password = decrypt_data(encrypted_password, key).decode()
+                print("VIEW KEY", key)
+                encrypted_password = entry["password"]
+                password = decrypt_data(encrypted_password, key)
                 print("-----------------")
                 print("Website:", entry["website"])
                 print("Username:", entry["username"])

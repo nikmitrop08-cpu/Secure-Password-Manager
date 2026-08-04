@@ -150,3 +150,12 @@ def runner(key):
         else:
             print("Your password is not saved")
     return password
+
+def generate_password_gui(length ,uppercase , lowercase , digits, symbols):
+
+    characters = character_pool(uppercase, lowercase, digits, symbols)
+    password = generate_password(length, characters, uppercase, digits, symbols, lowercase)
+    entropy = calculate_entropy(password, characters)
+    strength = strength_checker(password, uppercase, lowercase, digits, symbols)
+
+    return password, strength, entropy

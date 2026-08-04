@@ -1,11 +1,12 @@
-
+root = None
 import json
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox , simpledialog
 from tkinter import ttk
-from authentication import verify_user
+from authentication import verify_user , change_master_password
 from encryption import create_key , encrypt_data, decrypt_data
 from vault import view_vault , save_data
+from password_generator import generate_password_gui
 
 search_entry = None
 key=None
@@ -18,7 +19,7 @@ def login_screen():
     global root
     global password_entry
 
-    root = tk.Tk()
+
     root.title("Password Manager")
     root.geometry("400x300")
 
@@ -35,7 +36,7 @@ def login_screen():
     login_button.pack(pady=10)
 
     password_entry.bind("<Return>", lambda event: login())
-    root.mainloop()
+
 
 def login():
     global attempts
@@ -55,6 +56,71 @@ def login():
 
         if attempts == 0:
             root.destroy()
+            return
+
+def change_master_screen():
+
+    global root
+    global old_entry
+    global new_entry
+    global confirm_entry
+
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text="Old Master Password").pack()
+
+    old_entry= tk.Entry(root, show="*")
+    old_entry.pack()
+
+    tk.Label(root, text = " New Master Password ").pack()
+
+    new_entry = tk.Entry(root, show="*")
+    new_entry.pack()
+
+    tk.Label(root , text = "Confirm New Master Password").pack()
+    confirm_entry = tk.Entry(root, show="*")
+    confirm_entry.pack()
+
+    tk.Button(root, text="Change Password", command= change_master_password_gui).pack()
+
+def generate_button():
+    try:
+        length = int(length_entry.get())
+        if length <=0:
+            messagebox.showerror("Error", "Enter a valid password length")
+            return
+    except ValueError:
+        messagebox.showerror("Error", "Length must be a number")
+        return
+
+    if not (uppercase_var.get() or lowercase_var.get() or digits_var.get() or symbols_var.get()):
+        messagebox.showerror("Error", "Select at least one character type")
+        return
+
+    result = generate_password_gui(int(length_entry.get()), uppercase_var.get(), lowercase_var.get() , digits_var.get(), symbols_var.get())
+    password, strength , entropy = result
+    password_entry.delete(0, tk.END)
+    password_entry.insert(0 , password)
+    strength_label.config(text=f"Strength: {strength}")
+    entropy_label.config(text=f"Entropy is: {round(entropy, 2)} bits")
+
+def change_master_password_gui():
+    old_password =old_entry.get()
+    new_password = new_entry.get()
+    confirm_password = confirm_entry.get()
+
+    if new_password != confirm_password:
+        messagebox.showerror("Error","New passwords do not match")
+        return
+
+    result = change_master_password(old_password, new_password)
+
+    if result:
+        messagebox.showinfo("Success", "Master password changed")
+        show_menu()
+    else :
+        messagebox.showerror("Error" , "Wrong old password")
 
 def add_password():
     global website_entry, username_entry, password_entry
@@ -212,17 +278,13 @@ def view_password():
     if selected:
         item = selected[0]
         values = table.item(item,"values")
-
+        index = table.index(item)
         if show_password:
             table.item(item,values=(values[0],values[1],"********"))
             show_password=False
         else :
-            website= values[0]
+            table.item(item,values=(values[0],values[1],passwords[index]["password"]))
 
-            for password in passwords:
-                if password["website"] == website:
-                    table.item(item,values=(values[0],values[1],password["password"]))
-                    break
             show_password=True
 
 def clear_search():
@@ -269,17 +331,91 @@ def delete_password():
         answer = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this password?")
         if answer:
             values = table.item(selected[0],"values")
-            for entry in passwords:
-                if entry["website"] == values[0] and entry["username"] == values[1]:
-                    passwords.remove(entry)
+
+            with open("vault.json", "r") as file:
+                vault = json.load(file)
+
+            for entry in vault:
+                website = decrypt_data(entry["website"],key)
+                username = decrypt_data(entry["username"],key)
+
+                if website == values[0] and username == values[1]:
+                    vault.remove(entry)
                     break
 
             with open("vault.json", "w") as file:
-                json.dump(passwords, file)
+                json.dump(vault, file, indent=4)
 
             table.delete(selected[0])
 
+def save_generated_password():
 
+    website = simpledialog.askstring("Website","Enter the website:")
+
+    username = simpledialog.askstring("Username","Enter the username:")
+
+    password = password_entry.get()
+
+    if password == "":
+        messagebox.showerror("Error","Generate a password first")
+        return
+    print("SAVE KEY", key)
+    save_data(website, username, password , key)
+
+    messagebox.showinfo("Success","Password has been saved")
+
+
+def generator_screen():
+    global password_entry
+    global strength_label
+    global entropy_label
+    global length_entry
+    global uppercase_var
+    global lowercase_var
+    global digits_var
+    global symbols_var
+
+    uppercase_var = tk.BooleanVar(value=True)
+    lowercase_var = tk.BooleanVar(value=True)
+    digits_var = tk.BooleanVar(value=True)
+    symbols_var = tk.BooleanVar(value=True)
+
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    tk.Label(root, text="Password Generator").pack()
+
+    tk.Label(root , text ="Password Length").pack()
+
+    length_entry = tk.Entry(root)
+    length_entry.pack()
+
+    tk.Checkbutton(root, text="Uppercase",variable= uppercase_var).pack()
+    tk.Checkbutton(root, text = "Lowercase",variable = lowercase_var).pack()
+    tk.Checkbutton(root, text = "Digits",variable = digits_var).pack()
+    tk.Checkbutton(root, text = "Symbols", variable = symbols_var).pack()
+
+    password_entry = tk.Entry(root, width=40)
+    password_entry.pack()
+
+    strength_label = tk.Label(root, text="")
+    strength_label.pack()
+
+    entropy_label = tk.Label(root, text="")
+    entropy_label.pack()
+
+    tk.Button(root, text ="Generate", command= generate_button).pack()
+
+    tk.Button(root, text ="Save", command= save_generated_password).pack()
+
+    tk.Button(root, text ="Back", command = show_menu).pack()
+
+
+def lock_vault():
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    login_screen()
 
 def show_menu():
 
@@ -295,16 +431,15 @@ def show_menu():
     add_button = tk.Button(root, text="Add Passwords",command = add_password, width=20)
     add_button.pack(pady=5)
 
-    generate_button = tk.Button(root, text="Generate Passwords", width=20)
-    generate_button.pack(pady=5)
+    generate_button1 = tk.Button(root, text="Generate Passwords", width=20, command = generator_screen)
+    generate_button1.pack(pady=5)
 
-    change_button = tk.Button(root, text="Change Master Password", width=20)
+    change_button = tk.Button(root, text="Change Master Password", width=20 , command = change_master_screen)
     change_button.pack(pady=5)
 
-    lock_button = tk.Button(root, text="Lock Vault", width=20)
+    lock_button = tk.Button(root, text="Lock Vault", width=20 , command = lock_vault)
     lock_button.pack(pady=5)
 
     exit_button = tk.Button(root, text="Exit", width=20, command=root.destroy)
     exit_button.pack(pady=5)
-
 
