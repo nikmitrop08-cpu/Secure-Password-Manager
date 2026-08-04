@@ -6,6 +6,7 @@ VAULT_FILE = "vault.json"
 
 def save_data(website, username, password , key) :
 
+
     entry = {
         "website" : website,
         "username" : username,
@@ -19,10 +20,9 @@ def save_data(website, username, password , key) :
     except FileNotFoundError :
         vault = []
 
-    password = entry["password"]
+
     encrypted_password = encrypt_data(password, key)
-    print(type(encrypted_password))
-    print(encrypted_password)
+
     entry["password"] = encrypted_password
 
     vault.append(entry)
@@ -50,8 +50,8 @@ def view_vault(key) :
     for entry in vault:
         print("ENTRY", entry)
         decrypted_entry= {
-            "website" : decrypt_data(entry["website"], key),
-            "username" : decrypt_data(entry["username"], key),
+            "website" : entry["website"],
+            "username" : entry["username"],
             "password" : decrypt_data(entry["password"], key)
         }
         decrypted_vault.append(decrypted_entry)

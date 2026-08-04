@@ -1,1 +1,12 @@
-[]
+[
+    {
+        "website": "gmail",
+        "username": "nikos",
+        "password": "gAAAAABqcfiNE8IH6Q_cdbYhHlJaOP_7eamWriKVcaBIoeMHDCPihGWrwDtic6csOx2SlvLTyLOna_eUhLMYCEvVmlftdK_Xew=="
+    },
+    {
+        "website": "alpha",
+        "username": "dimitris",
+        "password": "gAAAAABqcfi58TFlsyv7YYg1vQpiNwCTlYFiwKbzLrslY_jcfYdiytNWY9aBucKGAlbCCvXjJaFUFNorfa4YxOvDNV1jWIIamQ=="
+    }
+]

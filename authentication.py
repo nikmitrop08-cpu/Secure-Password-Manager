@@ -5,9 +5,9 @@ from encryption import create_key , encrypt_data, decrypt_data
 
 CONFIG_FILE = "config.json"
 
-def create_master_password() :
+def create_master_password(master_password) :
 
-    master_password = input("Enter master password: ")
+
 
 
 

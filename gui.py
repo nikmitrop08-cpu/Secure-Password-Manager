@@ -3,7 +3,7 @@ import json
 import tkinter as tk
 from tkinter import messagebox , simpledialog
 from tkinter import ttk
-from authentication import verify_user , change_master_password
+from authentication import verify_user , change_master_password , create_master_password , master_password_exists
 from encryption import create_key , encrypt_data, decrypt_data
 from vault import view_vault , save_data
 from password_generator import generate_password_gui
@@ -57,6 +57,45 @@ def login():
         if attempts == 0:
             root.destroy()
             return
+
+def create_master_password_gui():
+
+    window = tk.Toplevel()
+    window.title("Create Master Password")
+    window.geometry("400x300")
+
+    tk.Label(window, text="Create Master Password").pack(pady=20)
+
+    password_entry = tk.Entry(window, show="*" )
+    password_entry.pack()
+
+    tk.Label(window , text = "Confirm Password").pack(pady=10)
+    confirm_entry = tk.Entry(window, show="*" )
+    confirm_entry.pack()
+
+    def create():
+        password = password_entry.get()
+        confirm = confirm_entry.get()
+
+        if password != confirm:
+            messagebox.showerror("Error", "Passwords do not match")
+            return
+
+        create_master_password(password)
+
+        messagebox.showinfo("Success", "Master password created")
+
+        window.destroy()
+
+        login_screen()
+
+    tk.Button(window , text = "Create", command =create).pack(pady=20)
+
+def startapp():
+    if master_password_exists():
+        login_screen()
+    else :
+        create_master_password_gui()
 
 def change_master_screen():
 
@@ -176,7 +215,7 @@ def save_new_password(website_entry , username_entry , password_entry , key):
     print("Username:",username)
     print("Password:", password)
 
-    encrypted_entry = {"website": encrypt_data(website, key), "username": encrypt_data(username, key), "password": encrypt_data(password, key)}
+    encrypted_entry = {"website": website, "username": username, "password": encrypt_data(password, key)}
 
     try:
         with open("vault.json", "r") as file:
@@ -321,7 +360,7 @@ def edit_password():
 
         website_entry.insert(0,values[0])
         username_entry.insert(0,values[1])
-        password_entry.insert(0,values[2])
+        password_entry.insert(0,passwords[editing_index]["password"])
 
 
 def delete_password():
@@ -336,8 +375,8 @@ def delete_password():
                 vault = json.load(file)
 
             for entry in vault:
-                website = decrypt_data(entry["website"],key)
-                username = decrypt_data(entry["username"],key)
+                website = entry["website"]
+                username = entry["username"]
 
                 if website == values[0] and username == values[1]:
                     vault.remove(entry)

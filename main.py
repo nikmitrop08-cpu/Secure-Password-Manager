@@ -12,7 +12,8 @@ def main():
     global root
 
     gui.root = tk.Tk()
-    gui.login_screen()
+
+    gui.startapp()
     gui.root.mainloop()
 
 if __name__ == "__main__":
