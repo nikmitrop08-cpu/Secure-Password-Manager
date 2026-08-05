@@ -4,17 +4,11 @@ from authentication import   change_master_password
 from vault import view_vault, search_vault, edit_vault, delete_password
 from encryption import create_key
 from gui import login_screen
-import tkinter as tk
-import gui
+from gui_pyside import startapp
 
 
 def main():
-    global root
-
-    gui.root = tk.Tk()
-
-    gui.startapp()
-    gui.root.mainloop()
+    startapp()
 
 if __name__ == "__main__":
     main()
