@@ -1,3 +1,4 @@
+
 import sys
 import os
 import json
@@ -10,20 +11,26 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
-    QMessageBox
+    QMessageBox,
+    QCheckBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QHBoxLayout
 )
 
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 
-
 from authentication import (
     verify_user,
     create_master_password,
-    master_password_exists,change_master_password
+    master_password_exists,
+    change_master_password
 )
 
 from encryption import create_key, encrypt_data
+from vault import view_vault, save_data
+from password_generator import generate_password_gui
 
 
 # =========================
@@ -68,13 +75,11 @@ class MainWindow(QMainWindow):
             600
         )
 
-        # App icon
         self.setWindowIcon(
             QIcon(
                 icon_path("lock.svg")
             )
         )
-
 
         self.container = QWidget()
 
@@ -82,26 +87,21 @@ class MainWindow(QMainWindow):
             self.container
         )
 
-
         self.layout = QVBoxLayout()
-
 
         self.layout.setAlignment(
             Qt.AlignCenter
         )
 
-
         self.container.setLayout(
             self.layout
         )
-
 
         self.setStyleSheet("""
 
         QMainWindow {
             background-color: #080b12;
         }
-
 
         QWidget {
             background-color: #080b12;
@@ -110,59 +110,35 @@ class MainWindow(QMainWindow):
             font-size: 14px;
         }
 
-
         QLabel {
-
             color: #00A8FF;
             font-size: 16px;
-
         }
-
 
         QPushButton {
-
             background-color: #001f3f;
-
             color: #00A8FF;
-
             border: 1px solid #00A8FF;
-
             border-radius: 8px;
-
             padding: 10px;
-
             min-width: 180px;
-
         }
-
 
         QPushButton:hover {
-
             background-color: #003366;
-
             color: #00FFFF;
-
         }
 
-
         QLineEdit {
-
             background-color: #111827;
-
             color: white;
-
             border: 1px solid #00A8FF;
-
             border-radius: 6px;
-
             padding: 8px;
-
             min-width: 250px;
-
         }
 
         """)
-
 
 
 # =========================
@@ -178,9 +154,7 @@ def clear_screen():
         widget = item.widget()
 
         if widget:
-
             widget.deleteLater()
-
 
 
 # =========================
@@ -191,31 +165,22 @@ def startapp():
 
     global window
 
-
     app = QApplication.instance()
 
     if app is None:
-
         app = QApplication(sys.argv)
-
 
     window = MainWindow()
 
-
     if master_password_exists():
-
         login_screen()
 
     else:
-
         create_master_password_gui()
-
 
     window.show()
 
-
     app.exec()
-
 
 
 # =========================
@@ -226,9 +191,7 @@ def login_screen():
 
     global password_entry
 
-
     clear_screen()
-
 
     title = QLabel(
         "Secure Password Manager"
@@ -242,7 +205,6 @@ def login_screen():
         title
     )
 
-
     label = QLabel(
         "Master Password"
     )
@@ -251,24 +213,19 @@ def login_screen():
         label
     )
 
-
     password_entry = QLineEdit()
-
 
     password_entry.setEchoMode(
         QLineEdit.Password
     )
 
-
     window.layout.addWidget(
         password_entry
     )
 
-
     button = QPushButton(
         "Login"
     )
-
 
     button.setIcon(
         QIcon(
@@ -276,16 +233,13 @@ def login_screen():
         )
     )
 
-
     button.clicked.connect(
         login
     )
 
-
     window.layout.addWidget(
         button
     )
-
 
 
 # =========================
@@ -297,9 +251,7 @@ def login():
     global attempts
     global key
 
-
     password = password_entry.text()
-
 
     if verify_user(password):
 
@@ -307,11 +259,9 @@ def login():
 
         show_menu()
 
-
     else:
 
         attempts -= 1
-
 
         QMessageBox.critical(
             window,
@@ -319,11 +269,8 @@ def login():
             f"Attempts left: {attempts}"
         )
 
-
         if attempts == 0:
-
             window.close()
-
 
 
 # =========================
@@ -333,7 +280,6 @@ def login():
 def create_master_password_gui():
 
     clear_screen()
-
 
     title = QLabel(
         "Create Master Password"
@@ -347,7 +293,6 @@ def create_master_password_gui():
         title
     )
 
-
     password = QLineEdit()
 
     password.setEchoMode(
@@ -357,7 +302,6 @@ def create_master_password_gui():
     window.layout.addWidget(
         password
     )
-
 
     confirm = QLineEdit()
 
@@ -369,22 +313,18 @@ def create_master_password_gui():
         confirm
     )
 
-
     button = QPushButton(
         "Create"
     )
-
 
     button.clicked.connect(
         lambda:
         create(password, confirm)
     )
 
-
     window.layout.addWidget(
         button
     )
-
 
 
 def create(password, confirm):
@@ -399,11 +339,9 @@ def create(password, confirm):
 
         return
 
-
     create_master_password(
         password.text()
     )
-
 
     QMessageBox.information(
         window,
@@ -411,8 +349,8 @@ def create(password, confirm):
         "Master password created"
     )
 
-
     login_screen()
+
 
 # =========================
 # MAIN MENU
@@ -421,7 +359,6 @@ def create(password, confirm):
 def show_menu():
 
     clear_screen()
-
 
     title = QLabel(
         "Welcome to your Vault"
@@ -435,7 +372,6 @@ def show_menu():
         title
     )
 
-
     view_button = QPushButton(
         "View Passwords"
     )
@@ -447,7 +383,6 @@ def show_menu():
     window.layout.addWidget(
         view_button
     )
-
 
     add_button = QPushButton(
         "Add Password"
@@ -467,7 +402,6 @@ def show_menu():
         add_button
     )
 
-
     generator_button = QPushButton(
         "Generate Password"
     )
@@ -479,7 +413,6 @@ def show_menu():
     window.layout.addWidget(
         generator_button
     )
-
 
     change_button = QPushButton(
         "Change Master Password"
@@ -499,7 +432,6 @@ def show_menu():
         change_button
     )
 
-
     lock_button = QPushButton(
         "Lock Vault"
     )
@@ -518,7 +450,6 @@ def show_menu():
         lock_button
     )
 
-
     exit_button = QPushButton(
         "Exit"
     )
@@ -532,7 +463,6 @@ def show_menu():
     )
 
 
-
 # =========================
 # LOCK VAULT
 # =========================
@@ -540,7 +470,6 @@ def show_menu():
 def lock_vault():
 
     login_screen()
-
 
 
 # =========================
@@ -552,16 +481,13 @@ username_entry = None
 new_password_entry = None
 
 
-
 def add_password():
 
     global website_entry
     global username_entry
     global new_password_entry
 
-
     clear_screen()
-
 
     title = QLabel(
         "Add New Password"
@@ -570,7 +496,6 @@ def add_password():
     window.layout.addWidget(
         title
     )
-
 
     website_entry = QLineEdit()
 
@@ -582,7 +507,6 @@ def add_password():
         website_entry
     )
 
-
     username_entry = QLineEdit()
 
     username_entry.setPlaceholderText(
@@ -592,7 +516,6 @@ def add_password():
     window.layout.addWidget(
         username_entry
     )
-
 
     new_password_entry = QLineEdit()
 
@@ -608,7 +531,6 @@ def add_password():
         new_password_entry
     )
 
-
     save_button = QPushButton(
         "Save"
     )
@@ -620,7 +542,6 @@ def add_password():
     window.layout.addWidget(
         save_button
     )
-
 
     back_button = QPushButton(
         "Back"
@@ -635,7 +556,6 @@ def add_password():
     )
 
 
-
 def save_new_password():
 
     website = website_entry.text()
@@ -644,12 +564,10 @@ def save_new_password():
 
     password = new_password_entry.text()
 
-
     encrypted = encrypt_data(
         password,
         key
     )
-
 
     data = {
 
@@ -661,7 +579,6 @@ def save_new_password():
 
     }
 
-
     try:
 
         with open(
@@ -671,16 +588,13 @@ def save_new_password():
 
             vault = json.load(file)
 
-
     except FileNotFoundError:
 
         vault = []
 
-
     vault.append(
         data
     )
-
 
     with open(
         "vault.json",
@@ -693,13 +607,11 @@ def save_new_password():
             indent=4
         )
 
-
     QMessageBox.information(
         window,
         "Success",
         "Password saved"
     )
-
 
 
 # =========================
@@ -711,16 +623,13 @@ new_entry = None
 confirm_entry = None
 
 
-
 def change_master_screen():
 
     global old_entry
     global new_entry
     global confirm_entry
 
-
     clear_screen()
-
 
     old_entry = QLineEdit()
 
@@ -736,7 +645,6 @@ def change_master_screen():
         old_entry
     )
 
-
     new_entry = QLineEdit()
 
     new_entry.setPlaceholderText(
@@ -750,7 +658,6 @@ def change_master_screen():
     window.layout.addWidget(
         new_entry
     )
-
 
     confirm_entry = QLineEdit()
 
@@ -766,7 +673,6 @@ def change_master_screen():
         confirm_entry
     )
 
-
     button = QPushButton(
         "Change Password"
     )
@@ -778,7 +684,6 @@ def change_master_screen():
     window.layout.addWidget(
         button
     )
-
 
 
 def change_password():
@@ -793,12 +698,10 @@ def change_password():
 
         return
 
-
     result = change_master_password(
         old_entry.text(),
         new_entry.text()
     )
-
 
     if result:
 
@@ -819,9 +722,8 @@ def change_password():
         )
 
 
-
 # =========================
-# PASSWORD GENERATOR SCREEN
+# PASSWORD GENERATOR
 # =========================
 
 length_entry = None
@@ -829,6 +731,89 @@ generated_password_entry = None
 strength_label = None
 entropy_label = None
 
+uppercase_checkbox = None
+lowercase_checkbox = None
+digits_checkbox = None
+symbols_checkbox = None
+
+
+def generate_password_button():
+
+    try:
+
+        length = int(
+            length_entry.text()
+        )
+
+        if length <= 0:
+            raise ValueError
+
+    except ValueError:
+
+        QMessageBox.warning(
+            window,
+            "Invalid Length",
+            "Enter a valid positive password length."
+        )
+
+        return
+
+    uppercase = uppercase_checkbox.isChecked()
+    lowercase = lowercase_checkbox.isChecked()
+    digits = digits_checkbox.isChecked()
+    symbols = symbols_checkbox.isChecked()
+
+    if not any([
+        uppercase,
+        lowercase,
+        digits,
+        symbols
+    ]):
+
+        QMessageBox.warning(
+            window,
+            "No Character Types",
+            "Select at least one character type."
+        )
+
+        return
+
+    required_categories = sum([
+        uppercase,
+        lowercase,
+        digits,
+        symbols
+    ])
+
+    if length < required_categories:
+
+        QMessageBox.warning(
+            window,
+            "Length Too Short",
+            "Password length is too short for the selected character types."
+        )
+
+        return
+
+    password, strength, entropy = generate_password_gui(
+        length,
+        uppercase,
+        lowercase,
+        digits,
+        symbols
+    )
+
+    generated_password_entry.setText(
+        password
+    )
+
+    strength_label.setText(
+        f"Strength: {strength}"
+    )
+
+    entropy_label.setText(
+        f"Entropy: {entropy:.2f} bits"
+    )
 
 
 def generator_screen():
@@ -838,9 +823,12 @@ def generator_screen():
     global strength_label
     global entropy_label
 
+    global uppercase_checkbox
+    global lowercase_checkbox
+    global digits_checkbox
+    global symbols_checkbox
 
     clear_screen()
-
 
     title = QLabel(
         "Password Generator"
@@ -849,7 +837,6 @@ def generator_screen():
     window.layout.addWidget(
         title
     )
-
 
     length_entry = QLineEdit()
 
@@ -861,13 +848,63 @@ def generator_screen():
         length_entry
     )
 
+    uppercase_checkbox = QCheckBox(
+        "Uppercase"
+    )
+
+    uppercase_checkbox.setChecked(
+        True
+    )
+
+    window.layout.addWidget(
+        uppercase_checkbox
+    )
+
+    lowercase_checkbox = QCheckBox(
+        "Lowercase"
+    )
+
+    lowercase_checkbox.setChecked(
+        True
+    )
+
+    window.layout.addWidget(
+        lowercase_checkbox
+    )
+
+    digits_checkbox = QCheckBox(
+        "Numbers"
+    )
+
+    digits_checkbox.setChecked(
+        True
+    )
+
+    window.layout.addWidget(
+        digits_checkbox
+    )
+
+    symbols_checkbox = QCheckBox(
+        "Symbols"
+    )
+
+    symbols_checkbox.setChecked(
+        True
+    )
+
+    window.layout.addWidget(
+        symbols_checkbox
+    )
 
     generated_password_entry = QLineEdit()
+
+    generated_password_entry.setReadOnly(
+        True
+    )
 
     window.layout.addWidget(
         generated_password_entry
     )
-
 
     strength_label = QLabel(
         ""
@@ -877,7 +914,6 @@ def generator_screen():
         strength_label
     )
 
-
     entropy_label = QLabel(
         ""
     )
@@ -885,7 +921,6 @@ def generator_screen():
     window.layout.addWidget(
         entropy_label
     )
-
 
     generate_button = QPushButton(
         "Generate"
@@ -899,7 +934,6 @@ def generator_screen():
         generate_button
     )
 
-
     back = QPushButton(
         "Back"
     )
@@ -912,15 +946,10 @@ def generator_screen():
         back
     )
 
+
 # =========================
 # VAULT TABLE
 # =========================
-
-from PySide6.QtWidgets import (
-    QTableWidget,
-    QTableWidgetItem,
-    QHBoxLayout
-)
 
 passwords = []
 
@@ -929,15 +958,12 @@ table = None
 showing_password = False
 
 
-
 def view_passwords():
 
     global table
     global passwords
 
-
     clear_screen()
-
 
     title = QLabel(
         "Your Saved Passwords"
@@ -947,14 +973,15 @@ def view_passwords():
         title
     )
 
-
-    passwords = view_vault(key)
-
+    passwords = view_vault(
+        key
+    )
 
     table = QTableWidget()
 
-
-    table.setColumnCount(3)
+    table.setColumnCount(
+        3
+    )
 
     table.setHorizontalHeaderLabels(
         [
@@ -964,11 +991,9 @@ def view_passwords():
         ]
     )
 
-
     table.setRowCount(
         len(passwords)
     )
-
 
     for row, entry in enumerate(passwords):
 
@@ -980,7 +1005,6 @@ def view_passwords():
             )
         )
 
-
         table.setItem(
             row,
             1,
@@ -988,7 +1012,6 @@ def view_passwords():
                 entry["username"]
             )
         )
-
 
         table.setItem(
             row,
@@ -998,17 +1021,13 @@ def view_passwords():
             )
         )
 
-
     table.resizeColumnsToContents()
-
 
     window.layout.addWidget(
         table
     )
 
-
     buttons = QHBoxLayout()
-
 
     edit_button = QPushButton(
         "Edit"
@@ -1024,7 +1043,6 @@ def view_passwords():
         edit_password
     )
 
-
     delete_button = QPushButton(
         "Delete"
     )
@@ -1039,7 +1057,6 @@ def view_passwords():
         delete_password_gui
     )
 
-
     show_button = QPushButton(
         "Show"
     )
@@ -1047,7 +1064,6 @@ def view_passwords():
     show_button.clicked.connect(
         show_password
     )
-
 
     copy_button = QPushButton(
         "Copy"
@@ -1063,7 +1079,6 @@ def view_passwords():
         copy_password
     )
 
-
     back = QPushButton(
         "Back"
     )
@@ -1071,7 +1086,6 @@ def view_passwords():
     back.clicked.connect(
         show_menu
     )
-
 
     buttons.addWidget(
         edit_button
@@ -1093,11 +1107,9 @@ def view_passwords():
         back
     )
 
-
     window.layout.addLayout(
         buttons
     )
-
 
 
 # =========================
@@ -1108,13 +1120,10 @@ def show_password():
 
     global showing_password
 
-
     row = table.currentRow()
-
 
     if row < 0:
         return
-
 
     if showing_password:
 
@@ -1127,7 +1136,6 @@ def show_password():
         )
 
         showing_password = False
-
 
     else:
 
@@ -1142,7 +1150,6 @@ def show_password():
         showing_password = True
 
 
-
 # =========================
 # COPY PASSWORD
 # =========================
@@ -1151,25 +1158,20 @@ def copy_password():
 
     row = table.currentRow()
 
-
     if row < 0:
         return
 
-
     password = passwords[row]["password"]
-
 
     QApplication.clipboard().setText(
         password
     )
-
 
     QMessageBox.information(
         window,
         "Copied",
         "Password copied"
     )
-
 
 
 # =========================
@@ -1180,10 +1182,8 @@ def delete_password_gui():
 
     row = table.currentRow()
 
-
     if row < 0:
         return
-
 
     answer = QMessageBox.question(
         window,
@@ -1191,11 +1191,8 @@ def delete_password_gui():
         "Delete this password?"
     )
 
-
     if answer != QMessageBox.Yes:
-
         return
-
 
     with open(
         "vault.json",
@@ -1204,9 +1201,7 @@ def delete_password_gui():
 
         vault = json.load(file)
 
-
     vault.pop(row)
-
 
     with open(
         "vault.json",
@@ -1219,9 +1214,7 @@ def delete_password_gui():
             indent=4
         )
 
-
     view_passwords()
-
 
 
 # =========================
@@ -1232,14 +1225,10 @@ def edit_password():
 
     row = table.currentRow()
 
-
     if row < 0:
-
         return
 
-
     clear_screen()
-
 
     website = QLineEdit()
 
@@ -1247,20 +1236,17 @@ def edit_password():
         passwords[row]["website"]
     )
 
-
     username = QLineEdit()
 
     username.setText(
         passwords[row]["username"]
     )
 
-
     password = QLineEdit()
 
     password.setText(
         passwords[row]["password"]
     )
-
 
     window.layout.addWidget(
         website
@@ -1274,11 +1260,9 @@ def edit_password():
         password
     )
 
-
     save = QPushButton(
         "Save Changes"
     )
-
 
     def save_edit():
 
@@ -1287,14 +1271,12 @@ def edit_password():
             key
         )
 
-
         with open(
             "vault.json",
             "r"
         ) as file:
 
             vault = json.load(file)
-
 
         vault[row] = {
 
@@ -1305,7 +1287,6 @@ def edit_password():
             "password": encrypted
 
         }
-
 
         with open(
             "vault.json",
@@ -1318,15 +1299,11 @@ def edit_password():
                 indent=4
             )
 
-
         view_passwords()
-
-
 
     save.clicked.connect(
         save_edit
     )
-
 
     window.layout.addWidget(
         save

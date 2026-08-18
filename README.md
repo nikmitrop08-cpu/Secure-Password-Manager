@@ -18,19 +18,6 @@ A desktop password manager built with Python and PySide6.
 - Password vault data is encrypted using Fernet symmetric encryption
 - User data is stored locally
 
-## Installation (Linux)
-
-Download:
-
-SecurePasswordManager.AppImage
-
-Make it executable:
-
-chmod +x SecurePasswordManager.AppImage
-
-Run:
-
-./SecurePasswordManager.AppImage
 
 ## Technologies Used
 
@@ -38,8 +25,6 @@ Run:
 - PySide6
 - bcrypt
 - Cryptography (Fernet)
-- PyInstaller
-- AppImage
 
 ## Screenshots
 
